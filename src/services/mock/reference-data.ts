@@ -1,0 +1,60 @@
+import type { City, EventType, ServiceCategory } from '@/models';
+
+export const categories: ServiceCategory[] = [
+  { id: 'cat-magicians', slug: 'magicians', motif: 'magic', sortOrder: 1,
+    name: { ar: 'ألعاب خفة', en: 'Magicians' },
+    description: { ar: 'سحرة محترفون وعروض خفة يد تبهر الصغار والكبار', en: 'Professional magicians and sleight-of-hand shows for all ages' } },
+  { id: 'cat-clowns', slug: 'clowns', motif: 'clown', sortOrder: 2,
+    name: { ar: 'مهرجين', en: 'Clowns' },
+    description: { ar: 'مهرجون مرحون وعروض كوميدية تملأ الحفل بالضحك', en: 'Cheerful clowns and comedy shows full of laughter' } },
+  { id: 'cat-mascots', slug: 'mascots', motif: 'mascot', sortOrder: 3,
+    name: { ar: 'شخصيات كرتونية', en: 'Mascot & Cartoon Characters' },
+    description: { ar: 'شخصيات محبوبة للتصوير والاستعراض والتفاعل', en: 'Beloved characters for parades, photos and fun' } },
+  { id: 'cat-kids', slug: 'kids-entertainment', motif: 'kids', sortOrder: 4,
+    name: { ar: 'عروض ترفيهية للأطفال', en: "Children's Entertainment" },
+    description: { ar: 'باقات ترفيه متكاملة مصممة للأطفال', en: 'Complete entertainment packages designed for kids' } },
+  { id: 'cat-interactive', slug: 'interactive-shows', motif: 'interactive', sortOrder: 5,
+    name: { ar: 'عروض تفاعلية', en: 'Interactive Shows' },
+    description: { ar: 'عروض يشارك فيها الجمهور ويتعلم ويستمتع', en: 'Shows where the audience joins in, learns and plays' } },
+  { id: 'cat-bubbles', slug: 'bubble-shows', motif: 'bubbles', sortOrder: 6,
+    name: { ar: 'عروض فقاعات الصابون', en: 'Bubble Shows' },
+    description: { ar: 'فقاعات عملاقة ومؤثرات ساحرة', en: 'Giant bubbles and dreamy effects' } },
+  { id: 'cat-magic-performances', slug: 'magic-performances', motif: 'illusion', sortOrder: 7,
+    name: { ar: 'عروض سحرية', en: 'Magic Performances' },
+    description: { ar: 'عروض مسرحية كبرى وأوهام بصرية مذهلة', en: 'Grand stage illusions and spectacular performances' } },
+  { id: 'cat-games', slug: 'games-competitions', motif: 'games', sortOrder: 8,
+    name: { ar: 'ألعاب ومسابقات', en: 'Games & Competitions' },
+    description: { ar: 'مسابقات وألعاب جماعية بجوائز وحماس', en: 'Team games and competitions with prizes' } },
+  { id: 'cat-hosts', slug: 'event-hosts', motif: 'host', sortOrder: 9,
+    name: { ar: 'مقدمو الفعاليات', en: 'Event Hosts & Presenters' },
+    description: { ar: 'مقدمون محترفون يديرون فقرات الحفل بثقة', en: 'Professional hosts who keep your event flowing' } },
+  { id: 'cat-variety', slug: 'variety', motif: 'variety', sortOrder: 10,
+    name: { ar: 'عروض ترفيهية متنوعة', en: 'Other Entertainment' },
+    description: { ar: 'عروض موسمية واستعراضية متنوعة', en: 'Seasonal, themed and specialty performances' } },
+];
+
+export const eventTypes: EventType[] = [
+  { id: 'birthday', icon: 'cake', name: { ar: 'أعياد الميلاد', en: 'Birthday parties' } },
+  { id: 'kids-party', icon: 'baby', name: { ar: 'حفلات الأطفال', en: "Children's parties" } },
+  { id: 'family', icon: 'home', name: { ar: 'مناسبات عائلية', en: 'Family events' } },
+  { id: 'wedding', icon: 'heart', name: { ar: 'الأعراس والملكة', en: 'Weddings & engagements' } },
+  { id: 'corporate', icon: 'briefcase', name: { ar: 'فعاليات الشركات', en: 'Corporate events' } },
+  { id: 'school', icon: 'school', name: { ar: 'فعاليات المدارس', en: 'School events' } },
+  { id: 'festival', icon: 'tent', name: { ar: 'المهرجانات والاحتفالات العامة', en: 'Festivals & public celebrations' } },
+  { id: 'national-day', icon: 'flag', name: { ar: 'اليوم الوطني والمواسم', en: 'National Day & seasonal' } },
+  { id: 'private', icon: 'sparkles', name: { ar: 'مناسبات خاصة', en: 'Private celebrations' } },
+];
+
+// travelFee values are illustrative demo assumptions, not approved pricing.
+export const cities: City[] = [
+  { id: 'riyadh', travelFee: 0, name: { ar: 'الرياض', en: 'Riyadh' }, region: { ar: 'منطقة الرياض', en: 'Riyadh Region' } },
+  { id: 'jeddah', travelFee: 0, name: { ar: 'جدة', en: 'Jeddah' }, region: { ar: 'منطقة مكة المكرمة', en: 'Makkah Region' } },
+  { id: 'dammam', travelFee: 0, name: { ar: 'الدمام', en: 'Dammam' }, region: { ar: 'المنطقة الشرقية', en: 'Eastern Province' } },
+  { id: 'khobar', travelFee: 0, name: { ar: 'الخبر', en: 'Al Khobar' }, region: { ar: 'المنطقة الشرقية', en: 'Eastern Province' } },
+  { id: 'makkah', travelFee: 150, name: { ar: 'مكة المكرمة', en: 'Makkah' }, region: { ar: 'منطقة مكة المكرمة', en: 'Makkah Region' } },
+  { id: 'madinah', travelFee: 200, name: { ar: 'المدينة المنورة', en: 'Madinah' }, region: { ar: 'منطقة المدينة المنورة', en: 'Madinah Region' } },
+  { id: 'taif', travelFee: 200, name: { ar: 'الطائف', en: 'Taif' }, region: { ar: 'منطقة مكة المكرمة', en: 'Makkah Region' } },
+  { id: 'abha', travelFee: 250, name: { ar: 'أبها', en: 'Abha' }, region: { ar: 'منطقة عسير', en: 'Asir Region' } },
+  { id: 'buraydah', travelFee: 200, name: { ar: 'بريدة', en: 'Buraydah' }, region: { ar: 'منطقة القصيم', en: 'Qassim Region' } },
+  { id: 'tabuk', travelFee: 300, name: { ar: 'تبوك', en: 'Tabuk' }, region: { ar: 'منطقة تبوك', en: 'Tabuk Region' } },
+];

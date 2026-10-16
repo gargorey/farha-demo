@@ -1,0 +1,124 @@
+@import 'tailwindcss';
+
+/* ---------- Design tokens ---------- */
+@theme {
+  --font-sans: 'Plus Jakarta Sans', 'IBM Plex Sans Arabic', ui-sans-serif, system-ui, sans-serif;
+  --font-arabic: 'IBM Plex Sans Arabic', 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
+
+  --color-ink-950: #1a1024;
+  --color-ink-900: #24172f;
+  --color-ink-700: #4a3d57;
+  --color-ink-500: #75697f;
+  --color-ink-300: #b9b0c0;
+  --color-ink-100: #ebe6ef;
+
+  --color-plum-950: #1f0f33;
+  --color-plum-900: #2d1648;
+  --color-plum-800: #3b1f5c;
+  --color-plum-700: #4e2a78;
+  --color-plum-600: #643a96;
+  --color-plum-500: #7c52b0;
+  --color-plum-200: #ddd0ef;
+  --color-plum-100: #efe8f8;
+  --color-plum-50: #f7f3fc;
+
+  --color-gold-600: #c98a12;
+  --color-gold-500: #e9a826;
+  --color-gold-400: #f2b544;
+  --color-gold-200: #fbe3b0;
+  --color-gold-100: #fdf1d8;
+
+  --color-coral-600: #e0503f;
+  --color-coral-500: #ff6b5b;
+  --color-coral-100: #ffe6e2;
+
+  --color-mint-600: #1f8f6a;
+  --color-mint-100: #dcf5ea;
+
+  --color-sand-50: #fbf8f4;
+  --color-sand-100: #f5efe6;
+  --color-sand-200: #ebe2d4;
+
+  --radius-xl: 1rem;
+  --radius-2xl: 1.25rem;
+  --radius-3xl: 1.75rem;
+
+  --shadow-soft: 0 1px 2px rgb(36 23 47 / 0.04), 0 4px 16px rgb(36 23 47 / 0.06);
+  --shadow-lift: 0 2px 4px rgb(36 23 47 / 0.05), 0 12px 32px rgb(36 23 47 / 0.12);
+  --shadow-glow: 0 10px 30px -8px rgb(233 168 38 / 0.55);
+
+  --animate-fade-up: fade-up 0.5s ease-out both;
+  --animate-pop: pop 0.25s ease-out both;
+  --animate-float: float 6s ease-in-out infinite;
+
+  @keyframes fade-up {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: none; }
+  }
+  @keyframes pop {
+    from { opacity: 0; transform: scale(0.96); }
+    to { opacity: 1; transform: none; }
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+  }
+}
+
+/* ---------- Base ---------- */
+@layer base {
+  html {
+    overflow-x: clip;
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+  }
+  body {
+    overflow-x: clip;
+    @apply bg-sand-50 text-ink-900 antialiased;
+    font-family: var(--font-sans);
+  }
+  html:lang(ar) body {
+    font-family: var(--font-arabic);
+    line-height: 1.7;
+  }
+  h1, h2, h3, h4 {
+    @apply text-ink-950;
+    text-wrap: balance;
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-plum-600);
+    outline-offset: 2px;
+  }
+  /* Phone numbers, emails and references stay LTR inside Arabic text. */
+  .ltr-value {
+    direction: ltr;
+    unicode-bidi: isolate;
+    display: inline-block;
+  }
+  /* Direction-aware icons (arrows/chevrons) flip in RTL. */
+  [dir='rtl'] .flip-rtl {
+    transform: scaleX(-1);
+  }
+  input[type='date']::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Select chevron positioned on the logical end side. */
+.select-chevron {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%2375697f'%3E%3Cpath d='M5.3 7.3a1 1 0 0 1 1.4 0L10 10.6l3.3-3.3a1 1 0 1 1 1.4 1.4l-4 4a1 1 0 0 1-1.4 0l-4-4a1 1 0 0 1 0-1.4z'/%3E%3C/svg%3E");
+  background-size: 1.1rem;
+  background-position: right 0.75rem center;
+}
+[dir='rtl'] .select-chevron {
+  background-position: left 0.75rem center;
+}
