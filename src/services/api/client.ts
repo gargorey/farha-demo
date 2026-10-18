@@ -21,6 +21,25 @@ export interface ContactMessage {
   message: string;
 }
 
+/** Business rules the backend sends so the website's estimates and date limits match it. */
+export interface PublicSettings {
+  vat: { enabled: boolean; rate: number; pricesIncludeVat: boolean };
+  applyTravelFee: boolean;
+  minLeadDays: number;
+  maxAdvanceDays: number;
+  cancellationCutoffHours: number;
+  modificationCutoffHours: number;
+  freeWithdrawalBeforeConfirmation: boolean;
+  /** True when the backend runs as a demo (sample data, codes shown on screen). */
+  demo: boolean;
+}
+
+/** Customer sign-in state: a phone number verified with a one-time code. */
+export interface CustomerSessionInfo {
+  verified: boolean;
+  phone?: string;
+}
+
 /**
  * The contract between the customer website and the backend (Project 2).
  * Pages and hooks depend only on this interface, never on a specific implementation.
@@ -42,4 +61,12 @@ export interface ApiClient {
   requestModification(id: string, request: ModificationRequest): Promise<Booking>;
   requestCancellation(id: string, request: CancellationRequest): Promise<Booking>;
   sendContactMessage(message: ContactMessage): Promise<{ id: string }>;
+
+  /** Null in the browser demo (it uses the values in src/config/business.ts). */
+  getPublicSettings(): Promise<PublicSettings | null>;
+  getCustomerSession(): Promise<CustomerSessionInfo>;
+  /** Sends a one-time code by SMS. `demoCode` is only returned by demo deployments. */
+  requestSignInCode(phone: string): Promise<{ sent: boolean; demoCode?: string }>;
+  verifySignInCode(phone: string, code: string): Promise<CustomerSessionInfo>;
+  signOut(): Promise<void>;
 }

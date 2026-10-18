@@ -1,5 +1,5 @@
 import { ApiError, type BookingHistoryEntry, type BookingStatus, type Paginated } from '@/models';
-import { addDays, todayISO } from '@/utils/dates';
+import { todayISO } from '@/utils/dates';
 import { adminStore } from '../data/admin-store';
 import type {
   AdminApiClient,
@@ -11,32 +11,15 @@ import type {
   ReportData,
 } from '../models';
 import { ACTIONS, isRevenueStatus, needsAction } from '../utils/booking-actions';
-import { BOOKING_STATUSES } from '@/models';
+import { buildDashboard, buildReport, round2 } from '../utils/analytics';
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 const clone = <T,>(v: T): T => structuredClone(v);
-const round2 = (n: number) => Math.round(n * 100) / 100;
 const digits = (phone: string) => phone.replace(/\D/g, '').slice(-9);
-const monthOf = (iso: string) => iso.slice(0, 7);
 
 function paginate<T>(items: T[], page = 1, pageSize = 20): Paginated<T> {
   const start = (Math.max(1, page) - 1) * pageSize;
   return { items: items.slice(start, start + pageSize), total: items.length };
-}
-
-function monthsBetween(from: string, to: string): string[] {
-  const out: string[] = [];
-  let [y, m] = from.slice(0, 7).split('-').map(Number);
-  const [ty, tm] = to.slice(0, 7).split('-').map(Number);
-  while (y < ty || (y === ty && m <= tm)) {
-    out.push(`${y}-${String(m).padStart(2, '0')}`);
-    m++;
-    if (m > 12) {
-      m = 1;
-      y++;
-    }
-  }
-  return out;
 }
 
 function mustGetBooking(id: string): AdminBooking {
@@ -107,18 +90,6 @@ function findCustomer(id: string) {
   return allCustomers().find((c) => c.id === id);
 }
 
-function group<K extends string>(bookings: AdminBooking[], key: (b: AdminBooking) => K) {
-  const map = new Map<K, { id: K; revenue: number; bookings: number }>();
-  for (const b of bookings) {
-    const k = key(b);
-    const row = map.get(k) ?? { id: k, revenue: 0, bookings: 0 };
-    row.bookings++;
-    if (isRevenueStatus(b.status)) row.revenue = round2(row.revenue + b.pricing.total);
-    map.set(k, row);
-  }
-  return [...map.values()].sort((a, b) => b.revenue - a.revenue || b.bookings - a.bookings);
-}
-
 export function createMockAdminClient(getActor: () => string, latencyMs = 180): AdminApiClient {
   const delay = () => sleep(latencyMs);
 
@@ -137,37 +108,22 @@ export function createMockAdminClient(getActor: () => string, latencyMs = 180): 
   return {
     isDemo: true,
 
+    // The demo signs in with an account picker (auth/session.tsx); no passwords.
+    async signIn() {
+      throw new ApiError('UNAUTHORIZED', 401);
+    },
+    async getMe() {
+      throw new ApiError('UNAUTHORIZED', 401);
+    },
+    async signOut() {},
+    async changePassword() {},
+    async resetStaffPassword() {
+      throw new ApiError('FORBIDDEN', 403);
+    },
+
     async getDashboard(): Promise<DashboardSummary> {
       await delay();
-      const all = adminStore.allBookings();
-      const today = todayISO();
-      const thisMonth = monthOf(today);
-      const lastMonth = monthOf(addDays(`${thisMonth}-01`, -1));
-      const created = (m: string) => all.filter((b) => monthOf(b.createdAt) === m && b.status !== 'draft').length;
-      const revenue = (m: string) => round2(all.filter((b) => monthOf(b.event.date) === m && isRevenueStatus(b.status)).reduce((s, b) => s + b.pricing.total, 0));
-      const months = monthsBetween(addDays(`${thisMonth}-01`, -150), today);
-      const upcoming = all
-        .filter((b) => b.event.date >= today && b.event.date <= addDays(today, 7) && (b.status === 'confirmed' || b.status === 'cancellation_requested'))
-        .sort((a, b) => (a.event.date + a.event.startTime).localeCompare(b.event.date + b.event.startTime));
-      const queue = all.filter(needsAction).sort((a, b) => a.event.date.localeCompare(b.event.date));
-      const statusCounts = Object.fromEntries(BOOKING_STATUSES.map((s) => [s, 0])) as Record<BookingStatus, number>;
-      all.forEach((b) => statusCounts[b.status]++);
-      return clone({
-        bookingsThisMonth: created(thisMonth),
-        bookingsLastMonth: created(lastMonth),
-        revenueThisMonth: revenue(thisMonth),
-        revenueLastMonth: revenue(lastMonth),
-        needsAction: queue.length,
-        upcoming7Days: upcoming.length,
-        actionQueue: queue.slice(0, 8),
-        upcoming: upcoming.slice(0, 8),
-        revenueByMonth: months.map((m) => ({
-          month: m,
-          revenue: revenue(m),
-          bookings: all.filter((b) => monthOf(b.event.date) === m && isRevenueStatus(b.status)).length,
-        })),
-        statusCounts,
-      });
+      return clone(buildDashboard(adminStore.allBookings(), todayISO()));
     },
 
     async listBookings(query = {}) {
@@ -377,40 +333,12 @@ export function createMockAdminClient(getActor: () => string, latencyMs = 180): 
     async getReport({ from, to }): Promise<ReportData> {
       await delay();
       const data = adminStore.load();
-      const services = serviceIndex();
-      const providers = new Map(data.providers.map((p) => [p.id, p]));
-      const inRange = adminStore.allBookings().filter((b) => b.event.date >= from && b.event.date <= to && b.status !== 'draft');
-      const paid = inRange.filter((b) => isRevenueStatus(b.status));
-      const gross = round2(paid.reduce((s, b) => s + b.pricing.total, 0));
-      const vat = round2(paid.reduce((s, b) => s + b.pricing.vat, 0));
-      const commission = round2(
-        paid.reduce((s, b) => {
-          const rate = providers.get(services.get(b.selection.serviceId)?.providerId ?? '')?.commissionRate ?? data.settings.defaultCommissionRate;
-          return s + (b.pricing.subtotal - b.pricing.discountTotal) * rate;
-        }, 0),
-      );
-      const channelCounts = new Map<string, number>();
-      inRange.forEach((b) => channelCounts.set(b.channel ?? 'website', (channelCounts.get(b.channel ?? 'website') ?? 0) + 1));
-      return clone({
-        range: { from, to },
-        bookings: inRange.length,
-        confirmedBookings: paid.length,
-        grossRevenue: gross,
-        netRevenue: round2(gross - vat),
-        vatCollected: vat,
-        commission,
-        averageBookingValue: paid.length ? round2(gross / paid.length) : 0,
-        cancellationRate: inRange.length ? inRange.filter((b) => b.status === 'cancelled').length / inRange.length : 0,
-        byMonth: monthsBetween(from, to).map((m) => {
-          const rows = paid.filter((b) => monthOf(b.event.date) === m);
-          return { month: m, revenue: round2(rows.reduce((s, b) => s + b.pricing.total, 0)), bookings: rows.length };
-        }),
-        byCategory: group(inRange, (b) => services.get(b.selection.serviceId)?.categoryId ?? 'unknown'),
-        byCity: group(inRange, (b) => b.event.cityId),
-        byEventType: group(inRange, (b) => b.event.eventTypeId),
-        topServices: group(inRange, (b) => b.selection.serviceId).slice(0, 8),
-        byChannel: [...channelCounts.entries()].map(([id, bookings]) => ({ id: id as 'website', bookings })).sort((a, b) => b.bookings - a.bookings),
-      });
+      const ctx = {
+        services: new Map(data.services.map((s) => [s.id, { categoryId: s.categoryId, providerId: s.providerId }])),
+        commissionRates: new Map(data.providers.map((p) => [p.id, p.commissionRate])),
+        defaultCommissionRate: data.settings.defaultCommissionRate,
+      };
+      return clone(buildReport(adminStore.allBookings(), ctx, from, to));
     },
 
     async listStaff() {

@@ -8,7 +8,8 @@ import { AdminLayout } from './components/AdminLayout';
 import { ToastProvider } from './components/ui';
 import { CatalogProvider } from './hooks/useCatalog';
 import { useAdminLocale } from './i18n';
-import LoginPage from './pages/LoginPage';
+import LoginPage, { AuthShell } from './pages/LoginPage';
+import { ChangePasswordForm } from './components/ChangePassword';
 import OverviewPage from './pages/OverviewPage';
 
 const BookingsPage = lazy(() => import('./pages/BookingsPage'));
@@ -65,11 +66,25 @@ const routes: RouteObject[] = [
   },
 ];
 
+function MustChangePassword() {
+  const { a } = useAdminLocale();
+  const { passwordChanged, signOut } = useSession();
+  return (
+    <AuthShell title={a('account.mustChangeTitle')} subtitle={a('account.mustChangeText')}>
+      <div className="mt-6">
+        <ChangePasswordForm onDone={passwordChanged} onCancel={signOut} />
+      </div>
+    </AuthShell>
+  );
+}
+
 function Gate() {
-  const { user } = useSession();
+  const { ready, user, mustChangePassword } = useSession();
   // Hash routing: the dashboard is a static build served from /admin/ next to the website.
   const router = useMemo(() => createHashRouter(routes), []);
+  if (!ready) return <LoadingBlock className="min-h-dvh" />;
   if (!user) return <LoginPage />;
+  if (mustChangePassword) return <MustChangePassword />;
   return (
     <CatalogProvider>
       <RouterProvider router={router} />

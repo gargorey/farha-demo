@@ -2,9 +2,8 @@ import { ApiError, type ApiErrorCode } from '@/models';
 import type { ApiClient } from './client';
 
 /**
- * REST implementation for the future backend (Project 2).
- * NOT exercised in the demo: it is here so switching VITE_API_MODE=http works
- * without touching pages or components once the backend exists.
+ * REST client for the backend (server/). Used when VITE_API_MODE=http.
+ * Session cookies are httpOnly and sent with `credentials: 'include'`.
  */
 export function createHttpClient(baseUrl: string, getLocale: () => string): ApiClient {
   async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
@@ -13,7 +12,7 @@ export function createHttpClient(baseUrl: string, getLocale: () => string): ApiC
       res = await fetch(`${baseUrl}${path}`, {
         ...init,
         headers: {
-          'Content-Type': 'application/json',
+          ...(init.body ? { 'Content-Type': 'application/json' } : {}),
           'Accept-Language': getLocale(),
           ...(init.headers ?? {}),
         },
@@ -24,7 +23,7 @@ export function createHttpClient(baseUrl: string, getLocale: () => string): ApiC
     }
     if (!res.ok) {
       const body = (await res.json().catch(() => ({}))) as { code?: ApiErrorCode; message?: string; fieldErrors?: [] };
-      throw new ApiError(body.code ?? (res.status === 404 ? 'NOT_FOUND' : 'UNKNOWN'), res.status, body.message, body.fieldErrors);
+      throw new ApiError(body.code ?? (res.status === 404 ? 'NOT_FOUND' : res.status === 429 ? 'RATE_LIMITED' : 'UNKNOWN'), res.status, body.message, body.fieldErrors);
     }
     return (await res.json()) as T;
   }
@@ -57,5 +56,10 @@ export function createHttpClient(baseUrl: string, getLocale: () => string): ApiC
     requestCancellation: (id, body) =>
       request(`/bookings/${encodeURIComponent(id)}/cancellation-requests`, { method: 'POST', body: JSON.stringify(body) }),
     sendContactMessage: (body) => request('/contact-messages', { method: 'POST', body: JSON.stringify(body) }),
+    getPublicSettings: () => request('/settings'),
+    getCustomerSession: () => request('/auth/session'),
+    requestSignInCode: (phone) => request('/auth/otp/request', { method: 'POST', body: JSON.stringify({ phone }) }),
+    verifySignInCode: (phone, code) => request('/auth/otp/verify', { method: 'POST', body: JSON.stringify({ phone, code }) }),
+    signOut: () => request<unknown>('/auth/logout', { method: 'POST', body: '{}' }).then(() => undefined),
   };
 }

@@ -42,25 +42,40 @@ export type CancellationAction =
   | { kind: 'request' } // confirmed: ask for cancellation, provider decides
   | { kind: 'blocked'; reason: 'status' | 'window' };
 
-export function cancellationActionFor(booking: Booking, now: Date = new Date()): CancellationAction {
+/** Policy values the lifecycle rules depend on. The backend passes its own (admin-editable) settings. */
+export interface LifecyclePolicy {
+  freeWithdrawalBeforeConfirmation: boolean;
+  cancellationCutoffHours: number;
+  modificationCutoffHours: number;
+}
+
+export function cancellationActionFor(
+  booking: Pick<Booking, 'status' | 'event'>,
+  now: Date = new Date(),
+  policy: LifecyclePolicy = businessConfig.policy,
+): CancellationAction {
   const { status } = booking;
   if (status === 'pending_request' || status === 'pending_confirmation') {
-    return businessConfig.policy.freeWithdrawalBeforeConfirmation ? { kind: 'withdraw' } : { kind: 'request' };
+    return policy.freeWithdrawalBeforeConfirmation ? { kind: 'withdraw' } : { kind: 'request' };
   }
   if (status !== 'confirmed') return { kind: 'blocked', reason: 'status' };
   const hours = hoursUntil(booking.event.date, booking.event.startTime, now);
-  if (hours < businessConfig.policy.cancellationCutoffHours) return { kind: 'blocked', reason: 'window' };
+  if (hours < policy.cancellationCutoffHours) return { kind: 'blocked', reason: 'window' };
   return { kind: 'request' };
 }
 
 export type ModificationAvailability = { allowed: true } | { allowed: false; reason: 'status' | 'window' | 'pending' };
 
-export function modificationAvailability(booking: Booking, now: Date = new Date()): ModificationAvailability {
+export function modificationAvailability(
+  booking: Pick<Booking, 'status' | 'event' | 'modificationRequest'>,
+  now: Date = new Date(),
+  policy: LifecyclePolicy = businessConfig.policy,
+): ModificationAvailability {
   if (!['pending_request', 'pending_confirmation', 'confirmed'].includes(booking.status)) {
     return { allowed: false, reason: 'status' };
   }
   if (booking.modificationRequest) return { allowed: false, reason: 'pending' };
   const hours = hoursUntil(booking.event.date, booking.event.startTime, now);
-  if (hours < businessConfig.policy.modificationCutoffHours) return { allowed: false, reason: 'window' };
+  if (hours < policy.modificationCutoffHours) return { allowed: false, reason: 'window' };
   return { allowed: true };
 }

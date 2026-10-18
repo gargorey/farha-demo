@@ -55,7 +55,7 @@ export default function BookingDetailsPage() {
   if (error instanceof ApiError && error.code === 'NOT_FOUND') {
     return (
       <Container className="py-16">
-        <EmptyState title={t('bookings.notFoundTitle')} text={t('bookings.notFoundText')} action={<ButtonLink to="/bookings">{t('nav.myBookings')}</ButtonLink>} />
+        <EmptyState title={t('bookings.notFoundTitle')} text={api.isDemo ? t('bookings.notFoundText') : t('bookings.notFoundTextLive')} action={<ButtonLink to="/bookings">{t('nav.myBookings')}</ButtonLink>} />
       </Container>
     );
   }
@@ -99,7 +99,7 @@ export default function BookingDetailsPage() {
           <p className="mt-2 max-w-xs text-sm text-ink-500">{t(`status.desc.${current.status}`)}</p>
         </div>
       </header>
-      {current.isDemo && <DemoNote className="mt-4">{t('bookings.demoSession')}</DemoNote>}
+      {api.isDemo && <DemoNote className="mt-4">{t('bookings.demoSession')}</DemoNote>}
       {notice && <p role="status" className="mt-4 rounded-xl bg-mint-100 px-4 py-3 text-sm font-semibold text-mint-600">{notice}</p>}
 
       <div className="mt-8 grid gap-6 lg:grid-cols-[1fr_20rem]">
@@ -172,7 +172,7 @@ export default function BookingDetailsPage() {
             <p className="mt-2 text-ink-500">{t('bookings.contactVia', { method: t(`booking.contactMethods.${current.customer.contactMethod}`) })}</p>
           </section>
 
-          {current.isDemo && nextSim && (
+          {api.isDemo && nextSim && (
             <section className="rounded-3xl border-2 border-dashed border-gold-200 bg-gold-100/40 p-6">
               <h2 className="flex items-center gap-2 font-bold"><FlaskConical className="size-4 text-gold-600" aria-hidden="true" />{t('bookings.demoControls')}</h2>
               <p className="mt-1 text-xs text-ink-500">{t('bookings.demoControlsText')}</p>

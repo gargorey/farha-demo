@@ -110,7 +110,7 @@ function BookingDetail({ booking: b, onChange }: { booking: AdminBooking; onChan
         <StatusBadge status={b.status} className="text-sm" />
       </div>
 
-      {b.origin === 'website' && (
+      {adminApi.isDemo && b.origin === 'website' && (
         <p className="mb-5 flex flex-wrap items-center gap-2 rounded-xl bg-plum-50 px-4 py-2.5 text-sm text-plum-800">
           <Globe className="size-4 shrink-0" aria-hidden="true" />
           <span className="flex-1">{a('booking.websiteSync')}</span>
@@ -248,7 +248,7 @@ function BookingDetail({ booking: b, onChange }: { booking: AdminBooking; onChan
 
           <Card title={a('booking.pricing')}>
             {service && <PriceSummary pricing={b.pricing} service={service} />}
-            {b.origin === 'website' && <p className="mt-3 text-xs text-ink-500">{a('booking.estimate')}</p>}
+            {adminApi.isDemo && b.origin === 'website' && <p className="mt-3 text-xs text-ink-500">{a('booking.estimate')}</p>}
           </Card>
 
           <Card title={a('booking.notes')}>

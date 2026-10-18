@@ -3,6 +3,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Mail, MessageCircle, Phone } from 'lucide-react';
 import { useLocale } from '@/hooks/useLocale';
 import { DemoNote } from '@/components/common/DemoNote';
+import { api } from '@/services/api';
 import { Field, Input } from '@/components/common/Field';
 import { cn } from '@/components/common/cn';
 import { contactSchema, type ContactFormValues } from './schemas';
@@ -58,7 +59,11 @@ export function ContactStep({ value, onBack, onNext }: { value: BookingDraft['cu
           </div>
         </fieldset>
       </div>
-      <DemoNote className="mt-6">{t('booking.privacyNote')}</DemoNote>
+      {api.isDemo ? (
+        <DemoNote className="mt-6">{t('booking.privacyNote')}</DemoNote>
+      ) : (
+        <p className="mt-6 text-sm text-ink-500">{t('booking.privacyNoteLive')}</p>
+      )}
       <StepActions onBack={() => onBack(getValues())} />
     </form>
   );

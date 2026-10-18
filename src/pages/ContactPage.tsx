@@ -57,8 +57,8 @@ export default function ContactPage() {
           {sentRef ? (
             <div className="py-10 text-center" role="status">
               <CheckCircle2 className="mx-auto size-14 text-mint-600" aria-hidden="true" />
-              <h2 className="mt-4 text-2xl font-bold">{t('contact.successTitle')}</h2>
-              <p className="mt-2 text-ink-500">{t('contact.successText', { ref: sentRef })}</p>
+              <h2 className="mt-4 text-2xl font-bold">{api.isDemo ? t('contact.successTitle') : t('contact.successTitleLive')}</h2>
+              <p className="mt-2 text-ink-500">{api.isDemo ? t('contact.successText', { ref: sentRef }) : t('contact.successTextLive', { ref: sentRef })}</p>
               <Button variant="outline" className="mt-6" onClick={() => setSentRef(undefined)}>{t('contact.sendAnother')}</Button>
             </div>
           ) : (
@@ -85,7 +85,7 @@ export default function ContactPage() {
               </Field>
               {sendError && <p role="alert" className="text-sm text-coral-600 sm:col-span-2">{t('error.text')}</p>}
               <div className="flex flex-wrap items-center justify-between gap-4 sm:col-span-2">
-                <DemoNote className="flex-1">{t('contact.formDemoNote')}</DemoNote>
+                {api.isDemo ? <DemoNote className="flex-1">{t('contact.formDemoNote')}</DemoNote> : <span className="flex-1" />}
                 <Button type="submit" size="lg" loading={isSubmitting} icon={<Send className="size-4 flip-rtl" aria-hidden="true" />}>
                   {isSubmitting ? t('contact.sending') : t('contact.send')}
                 </Button>

@@ -1,5 +1,5 @@
-import { CalendarHeart, Sparkles } from 'lucide-react';
-import { api } from '@/services/api';
+import { CalendarHeart, LogOut, Sparkles } from 'lucide-react';
+import { api, type CustomerSessionInfo } from '@/services/api';
 import { demoControls } from '@/services/mock/mock-client';
 import { useAsync } from '@/hooks/useAsync';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
@@ -7,6 +7,8 @@ import { useLocale } from '@/hooks/useLocale';
 import { isActiveStatus } from '@/utils/booking-lifecycle';
 import { useServicesIndex } from '@/features/customer-bookings/useServicesIndex';
 import { BookingSummaryCard } from '@/features/customer-bookings/BookingSummaryCard';
+import { PhoneSignIn } from '@/features/customer-bookings/PhoneSignIn';
+import { formatSaudiMobile } from '@/utils/phone';
 import { Breadcrumbs } from '@/components/common/Breadcrumbs';
 import { Button, ButtonLink } from '@/components/common/Button';
 import { Container } from '@/components/common/Container';
@@ -17,6 +19,12 @@ export default function MyBookingsPage() {
   const { t } = useLocale();
   useDocumentTitle(t('bookings.title'));
   const { data, error, loading, reload } = useAsync(() => api.listBookings(), []);
+  // With the backend, customers can sign in by phone to see bookings from any device.
+  const session = useAsync(() => (api.isDemo ? Promise.resolve<CustomerSessionInfo>({ verified: false }) : api.getCustomerSession()), []);
+  const refresh = () => {
+    session.reload();
+    reload();
+  };
   const services = useServicesIndex();
 
   const sorted = [...(data ?? [])].sort((a, b) => a.event.date.localeCompare(b.event.date));
@@ -28,6 +36,20 @@ export default function MyBookingsPage() {
       <Breadcrumbs items={[{ label: t('nav.home'), to: '/' }, { label: t('bookings.title') }]} />
       <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl">{t('bookings.title')}</h1>
       {api.isDemo && <DemoNote className="mt-4">{t('bookings.demoSession')}</DemoNote>}
+      {!api.isDemo && session.data && (
+        <div className="mt-6">
+          {session.data.verified ? (
+            <p className="flex flex-wrap items-center gap-3 text-sm text-ink-500">
+              <span>{t('bookings.signedInAs', { phone: formatSaudiMobile(session.data.phone ?? '') })}</span>
+              <Button size="sm" variant="ghost" icon={<LogOut className="flip-rtl size-4" aria-hidden="true" />} onClick={() => api.signOut().then(refresh)}>
+                {t('bookings.signOut')}
+              </Button>
+            </p>
+          ) : (
+            <PhoneSignIn onSignedIn={refresh} />
+          )}
+        </div>
+      )}
 
       <div className="mt-8">
         {error ? (

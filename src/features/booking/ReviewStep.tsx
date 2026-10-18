@@ -5,6 +5,7 @@ import { useLocale } from '@/hooks/useLocale';
 import { useReferenceData } from '@/hooks/useReferenceData';
 import { formatSaudiMobile } from '@/utils/phone';
 import { DemoNote } from '@/components/common/DemoNote';
+import { api } from '@/services/api';
 import { PriceSummary } from '@/components/booking/PriceSummary';
 import { StepActions } from './StepActions';
 import type { BookingDraft } from './useBookingDraft';
@@ -126,7 +127,7 @@ export function ReviewStep({
           {submitError}
         </p>
       )}
-      <DemoNote className="mt-4">{t('booking.confirmation.demoNote')}</DemoNote>
+      {api.isDemo && <DemoNote className="mt-4">{t('booking.confirmation.demoNote')}</DemoNote>}
 
       <StepActions onBack={() => goTo(3)} nextLabel={submitting ? t('booking.submitting') : t('booking.submit')} loading={submitting} />
     </form>

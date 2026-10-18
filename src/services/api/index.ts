@@ -4,7 +4,7 @@ import { createMockClient } from '../mock/mock-client';
 import type { ApiClient } from './client';
 import { createHttpClient } from './http-client';
 
-export type { ApiClient, ContactMessage } from './client';
+export type { ApiClient, ContactMessage, CustomerSessionInfo, PublicSettings } from './client';
 
 /** The single API instance used by the app. Switch with VITE_API_MODE. */
 export const api: ApiClient =

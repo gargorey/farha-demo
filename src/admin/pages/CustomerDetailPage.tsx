@@ -73,7 +73,7 @@ function CustomerView({ c, bookings, onSaved }: { c: CustomerWithStats; bookings
           <CustomerTags c={c} />
         </div>
       </div>
-      {c.fromWebsite && <p className="mb-5 rounded-xl bg-plum-50 px-4 py-2.5 text-sm text-plum-800">{a('customers.websiteOnly')}</p>}
+      {adminApi.isDemo && c.fromWebsite && <p className="mb-5 rounded-xl bg-plum-50 px-4 py-2.5 text-sm text-plum-800">{a('customers.websiteOnly')}</p>}
 
       <div className="mb-6 grid gap-4 sm:grid-cols-3">
         <KpiCard label={a('customers.stats.bookings')} value={num(c.bookingCount)} />

@@ -6,6 +6,9 @@ export type ApiErrorCode =
   | 'DATE_UNAVAILABLE'
   | 'TRANSITION_NOT_ALLOWED'
   | 'POLICY_WINDOW_CLOSED'
+  | 'UNAUTHORIZED'
+  | 'FORBIDDEN'
+  | 'RATE_LIMITED'
   | 'UNKNOWN';
 
 export interface FieldError {
