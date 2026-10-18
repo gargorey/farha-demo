@@ -1,3 +1,4 @@
+import { fileURLToPath, URL } from 'node:url';
 import { defineConfig, mergeConfig, type UserConfig } from 'vite';
 import { viteSingleFile } from 'vite-plugin-singlefile';
 import base from './vite.config';
@@ -15,5 +16,9 @@ export default defineConfig((env) => {
   });
   // Everything is inlined into one file, so vendor chunk splitting doesn't apply.
   delete (merged.build?.rollupOptions?.output as { manualChunks?: unknown } | undefined)?.manualChunks;
+  // One page per single-file build: DEMO_APP=admin builds the dashboard instead of the website.
+  const app = process.env.DEMO_APP === 'admin' ? 'admin/index.html' : 'index.html';
+  merged.build!.rollupOptions!.input = fileURLToPath(new URL(`./${app}`, import.meta.url));
+  if (process.env.DEMO_APP === 'admin') merged.build!.outDir = 'dist-admin-demo';
   return merged;
 });

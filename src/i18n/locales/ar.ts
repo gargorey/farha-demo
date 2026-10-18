@@ -401,6 +401,13 @@ const ar = {
     cancellationRequested: 'طلب العميل الإلغاء',
     cancellationApproved: 'تمت الموافقة على الإلغاء (محاكاة)',
     modificationRequested: 'طلب العميل تعديلاً',
+    staffReviewing: 'بدأ فريق فرحة مراجعة الطلب',
+    staffConfirmed: 'أكد فريق فرحة الحجز',
+    staffRejected: 'اعتذر فريق فرحة عن الطلب',
+    staffCompleted: 'تم تسجيل إقامة المناسبة',
+    staffCancellationApproved: 'وافق فريق فرحة على الإلغاء',
+    staffCancellationDeclined: 'رُفض طلب الإلغاء ويبقى الحجز مؤكداً',
+    staffModificationHandled: 'عالج فريق فرحة طلب التعديل',
   },
   pricing: {
     package: 'الباقة: {{name}}',

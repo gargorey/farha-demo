@@ -379,6 +379,13 @@ const en = {
     cancellationRequested: 'Cancellation requested by customer',
     cancellationApproved: 'Cancellation approved (simulated)',
     modificationRequested: 'Change requested by customer',
+    staffReviewing: 'Farha team started reviewing',
+    staffConfirmed: 'Booking confirmed by the Farha team',
+    staffRejected: 'Request declined by the Farha team',
+    staffCompleted: 'Event marked as completed',
+    staffCancellationApproved: 'Cancellation approved by the Farha team',
+    staffCancellationDeclined: 'Cancellation request declined; booking stays confirmed',
+    staffModificationHandled: 'Change request handled by the Farha team',
   },
   pricing: {
     package: 'Package: {{name}}',

@@ -1,0 +1,59 @@
+import { FlaskConical, LogIn } from 'lucide-react';
+import { LanguageSwitcher } from '@/components/layout/LanguageSwitcher';
+import { cn } from '@/components/common/cn';
+import { useSession } from '../auth/session';
+import { adminStore } from '../data/admin-store';
+import { useAdminLocale } from '../i18n';
+
+export default function LoginPage() {
+  const { a } = useAdminLocale();
+  const { signIn } = useSession();
+  const staff = adminStore.load().staff;
+  return (
+    <div className="min-h-dvh bg-plum-950 px-4 py-10">
+      <div className="mx-auto flex max-w-xl justify-end">
+        <LanguageSwitcher />
+      </div>
+      <div className="mx-auto mt-8 max-w-xl rounded-3xl bg-white p-6 shadow-lift sm:p-8">
+        <span className="grid size-12 place-items-center rounded-2xl bg-gold-400">
+          <svg viewBox="0 0 32 32" className="size-7" aria-hidden="true">
+            <path d="M16 4l2.9 7.1L26.5 12l-5.7 4.8L22.6 24 16 20l-6.6 4 1.8-7.2L5.5 12l7.6-.9z" fill="#2d1648" />
+          </svg>
+        </span>
+        <h1 className="mt-5 text-2xl font-extrabold">{a('login.title')}</h1>
+        <p className="mt-1 text-ink-500">{a('login.subtitle')}</p>
+        <ul className="mt-6 space-y-2.5">
+          {staff.map((u) => (
+            <li key={u.id}>
+              <button
+                type="button"
+                disabled={!u.active}
+                onClick={() => signIn(u)}
+                aria-label={a('login.signInAs', { name: u.name })}
+                className={cn(
+                  'flex w-full items-center gap-4 rounded-2xl border border-ink-100 p-4 text-start transition-colors',
+                  u.active ? 'hover:border-plum-200 hover:bg-plum-50' : 'cursor-not-allowed opacity-50',
+                )}
+              >
+                <span className="grid size-11 shrink-0 place-items-center rounded-full bg-plum-100 font-bold text-plum-800" aria-hidden="true">
+                  {u.name.charAt(0)}
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="block font-bold">{u.name}</span>
+                  <span className="block text-sm text-ink-500">
+                    {a(`roles.${u.role}`)} · {u.active ? a(`roles.desc.${u.role}`) : a('login.inactive')}
+                  </span>
+                </span>
+                {u.active && <LogIn className="flip-rtl size-5 shrink-0 text-plum-600" aria-hidden="true" />}
+              </button>
+            </li>
+          ))}
+        </ul>
+        <p className="mt-6 flex items-start gap-2 rounded-xl bg-gold-100 px-4 py-3 text-sm text-gold-600">
+          <FlaskConical className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+          {a('login.demoNote')}
+        </p>
+      </div>
+    </div>
+  );
+}
