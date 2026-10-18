@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Check, Minus, Pencil, Plus } from 'lucide-react';
+import { Check, Copy, KeyRound, Minus, Pencil, Plus } from 'lucide-react';
+import { ApiError } from '@/models';
 import { Badge } from '@/components/common/Badge';
 import { Button } from '@/components/common/Button';
 import { Field, Input, Select } from '@/components/common/Field';
@@ -9,7 +10,7 @@ import { useAsync } from '@/hooks/useAsync';
 import { adminApi } from '../api';
 import { ROLE_PERMISSIONS, ROLES } from '../auth/roles';
 import { useSession } from '../auth/session';
-import { Card, PageHeader, ReadOnlyNote, Toggle, table, useToast } from '../components/ui';
+import { Card, ConfirmDialog, PageHeader, ReadOnlyNote, Toggle, table, useToast } from '../components/ui';
 import { useAdminLocale } from '../i18n';
 import { PERMISSIONS, type RoleId, type StaffUser } from '../models';
 import { newId } from '../utils/helpers';
@@ -25,6 +26,10 @@ export default function StaffPage() {
   const [isNew, setIsNew] = useState(false);
   const [saving, setSaving] = useState(false);
   const [err, setErr] = useState('');
+  // One-time password to hand over (backend only; shown once).
+  const [temp, setTemp] = useState<{ name: string; password: string } | null>(null);
+  const [resetFor, setResetFor] = useState<StaffUser | null>(null);
+  const [copied, setCopied] = useState(false);
 
   async function save() {
     if (!edit) return;
@@ -34,12 +39,22 @@ export default function StaffPage() {
     }
     setSaving(true);
     try {
-      await adminApi.saveStaff(edit);
+      const saved = await adminApi.saveStaff(edit);
       toast(a('common.saved'));
       setEdit(null);
       staff.reload();
-    } catch {
-      setErr(a('staff.invalid'));
+      if (saved.temporaryPassword) setTemp({ name: saved.name, password: saved.temporaryPassword });
+    } catch (e) {
+      const msg = e instanceof ApiError ? e.message : '';
+      setErr(
+        e instanceof ApiError && e.fieldErrors[0]?.messageKey === 'admin.staff.emailTaken'
+          ? a('staff.emailTaken')
+          : e instanceof ApiError && e.code === 'FORBIDDEN'
+            ? a('staff.selfChange')
+            : msg.startsWith('At least one active administrator')
+              ? a('staff.lastAdmin')
+              : a('staff.invalid'),
+      );
     } finally {
       setSaving(false);
     }
@@ -228,6 +243,56 @@ export default function StaffPage() {
               )}
             </Field>
             <Toggle checked={edit.active} disabled={edit.id === user?.id} onChange={(v) => setEdit({ ...edit, active: v })} label={a('staff.activeLabel')} />
+            {!adminApi.isDemo && !isNew && edit.id !== user?.id && (
+              <Button variant="outline" size="sm" className="justify-self-start" icon={<KeyRound className="size-4" aria-hidden="true" />} onClick={() => setResetFor(edit)}>
+                {a('staff.resetPassword')}
+              </Button>
+            )}
+          </div>
+        )}
+      </Modal>
+
+      <ConfirmDialog
+        open={!!resetFor}
+        title={a('staff.resetTitle')}
+        text={a('staff.resetText')}
+        confirmLabel={a('staff.resetPassword')}
+        tone="danger"
+        onClose={() => setResetFor(null)}
+        onConfirm={async () => {
+          if (!resetFor) return;
+          try {
+            const r = await adminApi.resetStaffPassword(resetFor.id);
+            setTemp({ name: resetFor.name, password: r.temporaryPassword });
+            setEdit(null);
+          } catch {
+            toast(a('common.saveFailed'));
+          } finally {
+            setResetFor(null);
+          }
+        }}
+      />
+
+      <Modal
+        open={!!temp}
+        onClose={() => setTemp(null)}
+        title={a('staff.tempTitle')}
+        footer={<Button onClick={() => setTemp(null)}>{a('staff.done')}</Button>}
+      >
+        {temp && (
+          <div className="grid gap-4">
+            <p className="text-sm text-ink-700">{a('staff.tempText', { name: temp.name })}</p>
+            <div className="flex items-center gap-2 rounded-xl bg-sand-100 p-3">
+              <code dir="ltr" className="flex-1 text-lg font-bold tracking-wider">{temp.password}</code>
+              <Button
+                size="sm"
+                variant="ghost"
+                icon={<Copy className="size-4" aria-hidden="true" />}
+                onClick={() => navigator.clipboard?.writeText(temp.password).then(() => { setCopied(true); setTimeout(() => setCopied(false), 1500); })}
+              >
+                {copied ? a('staff.copied') : a('staff.copy')}
+              </Button>
+            </div>
           </div>
         )}
       </Modal>

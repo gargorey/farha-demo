@@ -5,3 +5,4 @@ dist-demo
 .env.local
 *.tsbuildinfo
 dist-admin-demo
+dist-server

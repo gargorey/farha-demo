@@ -191,7 +191,7 @@ export default function BookingsPage() {
                         <span className="ltr-value whitespace-nowrap">{b.reference}</span>
                       </Link>
                       <div className="text-xs text-ink-500">
-                        {b.origin === 'website' ? a('bookings.origin.website') : a(`bookings.channel.${b.channel ?? 'website'}`)}
+                        {adminApi.isDemo && b.origin === 'website' ? a('bookings.origin.website') : a(`bookings.channel.${b.channel ?? 'website'}`)}
                       </div>
                     </td>
                     <td className={table.td}>

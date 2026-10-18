@@ -195,8 +195,21 @@ export interface ReportData {
   byChannel: { id: BookingChannel; bookings: number }[];
 }
 
+export interface StaffSessionInfo {
+  user: StaffUser;
+  /** True after an administrator created or reset the account: a new password must be chosen first. */
+  mustChangePassword: boolean;
+}
+
 export interface AdminApiClient {
   readonly isDemo: boolean;
+
+  /** Staff sign-in (backend only; the demo uses an account picker). */
+  signIn(email: string, password: string): Promise<StaffSessionInfo>;
+  getMe(): Promise<StaffSessionInfo>;
+  signOut(): Promise<void>;
+  changePassword(currentPassword: string, newPassword: string): Promise<void>;
+
   getDashboard(): Promise<DashboardSummary>;
 
   listBookings(query?: BookingQuery): Promise<Paginated<AdminBooking>>;
@@ -228,6 +241,8 @@ export interface AdminApiClient {
   getReport(query: ReportQuery): Promise<ReportData>;
 
   listStaff(): Promise<StaffUser[]>;
-  saveStaff(user: StaffUser): Promise<StaffUser>;
+  /** A new account comes back once with `temporaryPassword` (backend only). */
+  saveStaff(user: StaffUser): Promise<StaffUser & { temporaryPassword?: string }>;
+  resetStaffPassword(id: string): Promise<{ temporaryPassword: string }>;
   listAudit(limit?: number): Promise<AuditEntry[]>;
 }

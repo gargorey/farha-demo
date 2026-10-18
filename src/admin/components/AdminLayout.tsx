@@ -6,6 +6,7 @@ import {
   CalendarDays,
   ExternalLink,
   FlaskConical,
+  KeyRound,
   Handshake,
   LayoutDashboard,
   LogOut,
@@ -27,7 +28,9 @@ import { useSession } from '../auth/session';
 import { ADMIN_CHANGE_EVENT, adminStore } from '../data/admin-store';
 import { useAdminLocale } from '../i18n';
 import { siteUrl } from '../utils/helpers';
-import { ConfirmDialog } from './ui';
+import { Modal } from '@/components/common/Modal';
+import { ChangePasswordForm } from './ChangePassword';
+import { ConfirmDialog, useToast } from './ui';
 
 type NavItem = { to: string; key: string; Icon: LucideIcon; end?: boolean };
 const NAV: { group: string; items: NavItem[] }[] = [
@@ -119,10 +122,12 @@ function Sidebar({ needsAction, onNavigate }: { needsAction: number; onNavigate?
           <ExternalLink className="size-[18px]" aria-hidden="true" />
           {a('app.viewSite')}
         </a>
-        <button type="button" onClick={() => setResetOpen(true)} className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-sm text-white/70 hover:bg-white/6 hover:text-white">
-          <RotateCcw className="size-[18px]" aria-hidden="true" />
-          {a('app.resetDemo')}
-        </button>
+        {adminApi.isDemo && (
+          <button type="button" onClick={() => setResetOpen(true)} className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-sm text-white/70 hover:bg-white/6 hover:text-white">
+            <RotateCcw className="size-[18px]" aria-hidden="true" />
+            {a('app.resetDemo')}
+          </button>
+        )}
       </div>
       <ConfirmDialog
         open={resetOpen}
@@ -143,8 +148,10 @@ function Sidebar({ needsAction, onNavigate }: { needsAction: number; onNavigate?
 export function AdminLayout() {
   const { a } = useAdminLocale();
   const { user, signOut } = useSession();
+  const toast = useToast();
   const location = useLocation();
   const [drawer, setDrawer] = useState(false);
+  const [passwordOpen, setPasswordOpen] = useState(false);
   const [needsAction, setNeedsAction] = useState(0);
 
   // Refresh the "needs action" badge on every page change (cheap in the demo).
@@ -174,13 +181,15 @@ export function AdminLayout() {
       <a href="#admin-main" className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:start-2 focus:z-50 focus:rounded-lg focus:bg-white focus:px-3 focus:py-2">
         {a('app.skip')}
       </a>
-      <div className="bg-gold-100 text-gold-600">
-        <p className="flex items-center justify-center gap-2 px-4 py-1.5 text-center text-xs font-medium">
-          <FlaskConical className="size-3.5 shrink-0" aria-hidden="true" />
-          <span className="hidden sm:inline">{a('app.demoBanner')}</span>
-          <span className="sm:hidden">{a('app.demoShort')}</span>
-        </p>
-      </div>
+      {adminApi.isDemo && (
+        <div className="bg-gold-100 text-gold-600">
+          <p className="flex items-center justify-center gap-2 px-4 py-1.5 text-center text-xs font-medium">
+            <FlaskConical className="size-3.5 shrink-0" aria-hidden="true" />
+            <span className="hidden sm:inline">{a('app.demoBanner')}</span>
+            <span className="sm:hidden">{a('app.demoShort')}</span>
+          </p>
+        </div>
+      )}
       <div className="flex">
         <aside className="sticky top-0 hidden h-dvh w-64 shrink-0 lg:block">
           <Sidebar needsAction={needsAction} />
@@ -212,6 +221,11 @@ export function AdminLayout() {
                   <span className="block text-sm font-semibold">{user.name}</span>
                   <span className="block text-xs text-ink-500">{a(`roles.${user.role}`)}</span>
                 </span>
+                {!adminApi.isDemo && (
+                  <button type="button" onClick={() => setPasswordOpen(true)} className="rounded-xl p-2 text-ink-500 hover:bg-sand-100 hover:text-ink-900" aria-label={a('account.change')} title={a('account.change')}>
+                    <KeyRound className="size-5" aria-hidden="true" />
+                  </button>
+                )}
                 <button type="button" onClick={signOut} className="rounded-xl p-2 text-ink-500 hover:bg-sand-100 hover:text-ink-900" aria-label={a('app.signOut')} title={a('app.signOut')}>
                   <LogOut className="flip-rtl size-5" aria-hidden="true" />
                 </button>
@@ -221,6 +235,17 @@ export function AdminLayout() {
           <main id="admin-main" className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:py-8">
             <Outlet />
           </main>
+          <Modal open={passwordOpen} onClose={() => setPasswordOpen(false)} title={a('account.change')}>
+            {passwordOpen && (
+              <ChangePasswordForm
+                onCancel={() => setPasswordOpen(false)}
+                onDone={() => {
+                  setPasswordOpen(false);
+                  toast(a('account.changed'));
+                }}
+              />
+            )}
+          </Modal>
         </div>
       </div>
     </div>

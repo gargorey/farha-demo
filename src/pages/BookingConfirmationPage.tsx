@@ -61,7 +61,7 @@ export default function BookingConfirmationPage() {
           <span className="text-ink-500">{t('booking.confirmation.status')}:</span>
           <StatusBadge status={booking.status} />
         </div>
-        {booking.isDemo && <DemoNote className="mx-auto mt-6 max-w-xl text-start">{t('booking.confirmation.demoNote')}</DemoNote>}
+        {api.isDemo && <DemoNote className="mx-auto mt-6 max-w-xl text-start">{t('booking.confirmation.demoNote')}</DemoNote>}
       </div>
 
       <div className="mt-6 grid gap-6 md:grid-cols-2">

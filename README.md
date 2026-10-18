@@ -1,8 +1,10 @@
-# Farha — Event Entertainment Booking Website & Admin Dashboard (Projects 1 and 3 of 3)
+# Farha — Event Entertainment Booking Website, Admin Dashboard & Backend (Projects 1–3)
 
 Bilingual (Arabic default, English) customer website for discovering and booking entertainment for events in Saudi Arabia: magicians, clowns, mascot characters, bubble shows, hosts and more.
 
-**This is a frontend demo.** All services, providers, reviews and bookings are fictional. No real booking, payment, notification or message is ever sent; this is stated in the UI wherever it matters.
+**Backend (Project 2)** lives in `server/`: Node.js + Fastify + PostgreSQL, with staff accounts, customer phone sign-in, server-side pricing and permissions. Both apps use it with `VITE_API_MODE=http`. See [docs/06-backend.md](docs/06-backend.md).
+
+**The public GitHub Pages site is still the browser-only demo.** All services, providers, reviews and bookings are fictional. No real booking, payment, notification or message is ever sent; this is stated in the UI wherever it matters.
 
 **Admin dashboard (Project 3)** lives in the same codebase at `/admin/` (`admin/index.html`, `src/admin/`). It manages bookings, the event calendar, services, categories, providers, customers, pricing, promotions, reports and staff permissions, on sample data. See [docs/05-admin-dashboard.md](docs/05-admin-dashboard.md).
 
@@ -24,10 +26,19 @@ npm run dev          # website: http://localhost:5173  ·  dashboard: http://loc
 | `npm run lint` | ESLint |
 | `npm run typecheck` | TypeScript only |
 | `npm run build:demo` / `npm run build:admin-demo` | One self-contained HTML file of the website / dashboard |
+| `npm run server:dev` / `server:build` / `server:test` | Backend: run, bundle, test (see docs/06) |
+| `npm run db:migrate` / `db:seed` / `db:create-admin` | Database setup |
 
 Static demo build that runs from any host or folder (hash routing, relative paths):
 ```bash
 VITE_ROUTER_MODE=hash npm run build
+```
+
+With the backend (needs PostgreSQL):
+```bash
+cp server/.env.example server/.env && npm run db:seed -- --sample
+npm run server:dev                 # API on :8080
+VITE_API_MODE=http npm run dev     # website and dashboard use it (dev staff password: farha-dev-password)
 ```
 
 ## Configuration
@@ -102,11 +113,12 @@ Home (search, categories, popular, recommended, how it works, by occasion, benef
 - Imagery is bundled vector artwork per category (no broken images, works offline). Real photos can be added via `media[].url` on each service.
 - Native date picker follows the browser's language settings.
 - Policies, VAT display, travel fees and prices are illustrative.
-- `http-client.ts` follows the proposed contract but has not been run against a server.
 
 ## Documentation
 
 - [Business & product analysis](docs/01-business-analysis.md)
 - [UX, journeys & booking lifecycle](docs/02-ux-journeys-and-lifecycle.md)
-- [Proposed API contract](docs/03-api-contract.md)
+- [API contract](docs/03-api-contract.md)
 - [Integration plan for Projects 2 & 3](docs/04-integration-plan.md)
+- [Admin dashboard](docs/05-admin-dashboard.md)
+- [Backend: running, security, hosting](docs/06-backend.md)

@@ -47,3 +47,40 @@ export const businessConfig = {
 } as const;
 
 export type BusinessConfig = typeof businessConfig;
+
+/**
+ * With the backend (VITE_API_MODE=http) the admin-editable rules come from the server
+ * at start-up, so price estimates, date limits and policy texts match what it enforces.
+ */
+/** Facts learned from the backend at start-up. */
+export const runtimeInfo = {
+  /** The backend runs as a demo (sample catalogue, codes shown on screen). */
+  serverDemo: false,
+};
+
+export interface ServerSettings {
+  vat: { enabled: boolean; rate: number; pricesIncludeVat: boolean };
+  applyTravelFee: boolean;
+  minLeadDays: number;
+  maxAdvanceDays: number;
+  cancellationCutoffHours: number;
+  modificationCutoffHours: number;
+  freeWithdrawalBeforeConfirmation: boolean;
+  demo?: boolean;
+}
+
+export function applyServerSettings(s: ServerSettings): void {
+  runtimeInfo.serverDemo = !!s.demo;
+  const cfg = businessConfig as unknown as {
+    pricing: Pick<ServerSettings, 'vat' | 'applyTravelFee'>;
+    booking: Pick<ServerSettings, 'minLeadDays' | 'maxAdvanceDays'>;
+    policy: Pick<ServerSettings, 'cancellationCutoffHours' | 'modificationCutoffHours' | 'freeWithdrawalBeforeConfirmation'>;
+  };
+  cfg.pricing.vat = { ...s.vat };
+  cfg.pricing.applyTravelFee = s.applyTravelFee;
+  cfg.booking.minLeadDays = s.minLeadDays;
+  cfg.booking.maxAdvanceDays = s.maxAdvanceDays;
+  cfg.policy.cancellationCutoffHours = s.cancellationCutoffHours;
+  cfg.policy.modificationCutoffHours = s.modificationCutoffHours;
+  cfg.policy.freeWithdrawalBeforeConfirmation = s.freeWithdrawalBeforeConfirmation;
+}

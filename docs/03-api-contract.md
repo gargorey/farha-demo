@@ -1,6 +1,6 @@
 # 3. Proposed REST API Contract (for Project 2)
 
-> **Proposed, not implemented.** The frontend calls these through `src/services/api/http-client.ts` when `VITE_API_MODE=http`. In the demo, `src/services/mock/mock-client.ts` implements the same `ApiClient` interface in the browser. TypeScript shapes: `src/models/`.
+> **Implemented in `server/` (see [06-backend.md](06-backend.md)).** The frontend calls these through `src/services/api/http-client.ts` when `VITE_API_MODE=http`. In the demo, `src/services/mock/mock-client.ts` implements the same `ApiClient` interface in the browser. TypeScript shapes: `src/models/`.
 
 ## Conventions
 

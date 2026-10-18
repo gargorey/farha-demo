@@ -1,13 +1,20 @@
 import { useMemo, type ReactNode } from 'react';
+import { applyServerSettings } from '@/config/business';
 import { api } from '@/services/api';
 import { useAsync } from '@/hooks/useAsync';
 import { ReferenceDataContext, type ReferenceData } from '@/hooks/useReferenceData';
 import { ErrorState, LoadingBlock } from '@/components/common/StateViews';
 
-/** Loads categories, event types and cities once, for the whole app. */
+/** Loads categories, event types, cities (and, with the backend, its business rules) once, for the whole app. */
 export function ReferenceDataProvider({ children }: { children: ReactNode }) {
   const { data, error, loading, reload } = useAsync(
-    () => Promise.all([api.listCategories(), api.listEventTypes(), api.listCities()]),
+    () =>
+      Promise.all([
+        api.listCategories(),
+        api.listEventTypes(),
+        api.listCities(),
+        api.getPublicSettings().then((s) => s && applyServerSettings(s)),
+      ]),
     [],
   );
 

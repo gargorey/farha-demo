@@ -169,6 +169,21 @@ export function createMockClient(latencyMs = appEnv.mockLatencyMs): ApiClient {
       await delay();
       return { id: `DEMO-MSG-${Date.now().toString(36).toUpperCase()}` };
     },
+
+    // The browser demo has no accounts: every booking made in this browser is shown.
+    async getPublicSettings() {
+      return null;
+    },
+    async getCustomerSession() {
+      return { verified: false };
+    },
+    async requestSignInCode() {
+      return { sent: false };
+    },
+    async verifySignInCode() {
+      return { verified: false };
+    },
+    async signOut() {},
   };
 }
 

@@ -80,8 +80,8 @@ export interface BookingHistoryEntry {
 export interface Booking {
   id: string;
   reference: string;
-  /** Always true in Project 1: the record exists only in this browser. */
-  isDemo: true;
+  /** True for demo records (browser-only or sample data); false for bookings stored by the backend. */
+  isDemo: boolean;
   status: BookingStatus;
   selection: BookingSelection;
   event: EventDetails;
