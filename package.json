@@ -10,7 +10,8 @@
     "typecheck": "tsc -b",
     "lint": "eslint .",
     "test": "vitest run",
-    "build:demo": "vite build --config vite.demo.config.ts"
+    "build:demo": "vite build --config vite.demo.config.ts",
+    "build:admin-demo": "DEMO_APP=admin vite build --config vite.demo.config.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",

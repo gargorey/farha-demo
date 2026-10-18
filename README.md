@@ -1,8 +1,10 @@
-# Farha — Event Entertainment Booking Website (Project 1 of 3)
+# Farha — Event Entertainment Booking Website & Admin Dashboard (Projects 1 and 3 of 3)
 
 Bilingual (Arabic default, English) customer website for discovering and booking entertainment for events in Saudi Arabia: magicians, clowns, mascot characters, bubble shows, hosts and more.
 
 **This is a frontend demo.** All services, providers, reviews and bookings are fictional. No real booking, payment, notification or message is ever sent; this is stated in the UI wherever it matters.
+
+**Admin dashboard (Project 3)** lives in the same codebase at `/admin/` (`admin/index.html`, `src/admin/`). It manages bookings, the event calendar, services, categories, providers, customers, pricing, promotions, reports and staff permissions, on sample data. See [docs/05-admin-dashboard.md](docs/05-admin-dashboard.md).
 
 ## Quick start
 
@@ -10,7 +12,7 @@ Requirements: Node.js 20+ (tested on 22).
 
 ```bash
 npm install
-npm run dev          # http://localhost:5173
+npm run dev          # website: http://localhost:5173  ·  dashboard: http://localhost:5173/admin/
 ```
 
 | Command | What it does |
@@ -21,6 +23,7 @@ npm run dev          # http://localhost:5173
 | `npm run test` | Unit tests (Vitest) |
 | `npm run lint` | ESLint |
 | `npm run typecheck` | TypeScript only |
+| `npm run build:demo` / `npm run build:admin-demo` | One self-contained HTML file of the website / dashboard |
 
 Static demo build that runs from any host or folder (hash routing, relative paths):
 ```bash
@@ -71,7 +74,9 @@ src/
     mock/            Demo data + mock API + browser booking store
   models/            Typed domain models
   hooks/  i18n/  utils/  config/  styles/
-docs/                Business analysis, journeys, API contract, integration plan
+  admin/             Admin dashboard (Project 3): pages, layout, admin API + mock, sample data, roles
+admin/index.html     Dashboard entry (served at /admin/)
+docs/                Business analysis, journeys, API contract, integration plan, admin dashboard
 ```
 
 ## Client demo walkthrough (≈5 min)

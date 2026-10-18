@@ -10,6 +10,11 @@ export default defineConfig(({ mode }) => ({
   plugins: [react(), tailwindcss()],
   build: {
     rollupOptions: {
+      // Two apps from one codebase: the customer website (/) and the admin dashboard (/admin/).
+      input: {
+        main: fileURLToPath(new URL('./index.html', import.meta.url)),
+        admin: fileURLToPath(new URL('./admin/index.html', import.meta.url)),
+      },
       output: {
         manualChunks: {
           react: ['react', 'react-dom', 'react-router-dom'],
