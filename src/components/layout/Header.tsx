@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { CalendarHeart, Menu, X } from 'lucide-react';
+import { CalendarHeart, LogIn, LogOut, Menu, UserRound, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { ButtonLink } from '../common/Button';
+import { useCustomerSession } from '@/features/customer-auth/session-context';
+import { formatSaudiMobile } from '@/utils/phone';
+import { Button, ButtonLink } from '../common/Button';
 import { cn } from '../common/cn';
 import { LanguageSwitcher } from './LanguageSwitcher';
 import { Logo } from './Logo';
@@ -20,6 +22,8 @@ export function Header() {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const location = useLocation();
+  const { session, signOut } = useCustomerSession();
+  const phone = session.verified && session.phone ? formatSaudiMobile(session.phone) : undefined;
 
   useEffect(() => setOpen(false), [location.pathname]);
 
@@ -39,6 +43,28 @@ export function Header() {
         </nav>
         <div className="flex items-center gap-2">
           <LanguageSwitcher />
+          {phone ? (
+            <span className="hidden items-center gap-1 md:flex">
+              <ButtonLink to="/bookings" variant="outline" size="sm" className="h-10" icon={<UserRound className="size-4" aria-hidden="true" />} title={t('auth.signedInAs', { phone })}>
+                <span className="ltr-value">{phone}</span>
+              </ButtonLink>
+              <button
+                type="button"
+                className="grid size-10 place-items-center rounded-full text-ink-700 hover:bg-plum-50 hover:text-plum-800"
+                aria-label={t('bookings.signOut')}
+                title={t('bookings.signOut')}
+                onClick={() => void signOut()}
+              >
+                <LogOut className="flip-rtl size-4" aria-hidden="true" />
+              </button>
+            </span>
+          ) : (
+            <span className="hidden md:block">
+              <ButtonLink to="/signin" variant="ghost" size="sm" className="h-10" icon={<LogIn className="flip-rtl size-4" aria-hidden="true" />}>
+                {t('auth.signIn')}
+              </ButtonLink>
+            </span>
+          )}
           <span className="hidden sm:block">
             <ButtonLink to="/services" variant="accent" size="sm" className="h-10" icon={<CalendarHeart className="size-4" aria-hidden="true" />}>
               {t('nav.bookNow')}
@@ -67,6 +93,23 @@ export function Header() {
               </li>
             ))}
           </ul>
+          <div className="mt-3 border-t border-ink-100 pt-3">
+            {phone ? (
+              <div className="flex items-center justify-between gap-3 px-4">
+                <span className="flex items-center gap-2 text-sm text-ink-700">
+                  <UserRound className="size-4" aria-hidden="true" />
+                  <span className="ltr-value">{phone}</span>
+                </span>
+                <Button size="sm" variant="ghost" icon={<LogOut className="flip-rtl size-4" aria-hidden="true" />} onClick={() => void signOut()}>
+                  {t('bookings.signOut')}
+                </Button>
+              </div>
+            ) : (
+              <ButtonLink to="/signin" variant="outline" className="w-full" icon={<LogIn className="flip-rtl size-4" aria-hidden="true" />}>
+                {t('auth.signIn')}
+              </ButtonLink>
+            )}
+          </div>
           <ButtonLink to="/services" variant="accent" className="mt-3 w-full">
             {t('nav.bookNow')}
           </ButtonLink>

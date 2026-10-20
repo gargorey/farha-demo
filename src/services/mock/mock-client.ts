@@ -8,6 +8,7 @@ import { calculatePricing } from '@/utils/pricing';
 import { readJSON } from '@/utils/storage';
 import type { ApiClient } from '../api/client';
 import { bookingStore } from './booking-store';
+import { demoCustomerAuth } from './customer-auth';
 import { categories, cities, eventTypes } from './reference-data';
 import { services } from './services-data';
 
@@ -133,7 +134,10 @@ export function createMockClient(latencyMs = appEnv.mockLatencyMs): ApiClient {
     },
     async listBookings() {
       await delay();
-      return clone(bookingStore.all());
+      // Signed in: only that number's bookings. Signed out: everything made in this browser.
+      const { phone } = demoCustomerAuth.session();
+      const all = bookingStore.all();
+      return clone(phone ? all.filter((b) => b.customer.phone === phone) : all);
     },
 
     async requestModification(id, { message }) {
@@ -170,20 +174,24 @@ export function createMockClient(latencyMs = appEnv.mockLatencyMs): ApiClient {
       return { id: `DEMO-MSG-${Date.now().toString(36).toUpperCase()}` };
     },
 
-    // The browser demo has no accounts: every booking made in this browser is shown.
     async getPublicSettings() {
       return null;
     },
+    // Demo sign-in: same steps as the backend, but the code is shown on screen.
     async getCustomerSession() {
-      return { verified: false };
+      return demoCustomerAuth.session();
     },
-    async requestSignInCode() {
-      return { sent: false };
+    async requestSignInCode(phone) {
+      await delay();
+      return demoCustomerAuth.requestCode(phone);
     },
-    async verifySignInCode() {
-      return { verified: false };
+    async verifySignInCode(phone, code) {
+      await delay();
+      return demoCustomerAuth.verify(phone, code);
     },
-    async signOut() {},
+    async signOut() {
+      demoCustomerAuth.signOut();
+    },
   };
 }
 
@@ -237,7 +245,7 @@ export const demoControls = {
         status,
         selection: { serviceId, packageId, addOns: [] },
         event: { eventTypeId, date: iso(dateOffset), startTime: '17:00', extraHours: 0, cityId, venue, attendees },
-        customer: { fullName: 'Demo Customer', phone: '+966500000000', email: 'demo@example.com', contactMethod: 'whatsapp' },
+        customer: { fullName: 'Demo Customer', phone: demoCustomerAuth.session().phone ?? '+966500000000', email: 'demo@example.com', contactMethod: 'whatsapp' },
         pricing: calculatePricing({ service, packageId, addOns: [], city }),
         createdAt: created,
         updatedAt: created,

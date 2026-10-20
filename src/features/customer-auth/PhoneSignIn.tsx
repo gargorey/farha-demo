@@ -3,17 +3,19 @@ import { KeyRound, Smartphone } from 'lucide-react';
 import { ApiError } from '@/models';
 import { api } from '@/services/api';
 import { useLocale } from '@/hooks/useLocale';
+import { useCustomerSession } from './session-context';
 import { normalizeSaudiMobile } from '@/utils/phone';
 import { Button } from '@/components/common/Button';
 import { Field, Input } from '@/components/common/Field';
 
 /**
- * Sign-in with a mobile number and a one-time SMS code (backend mode only).
- * Bookings made in this browser are visible without it; signing in shows every
- * booking made with the number, on any device.
+ * Sign-in with a mobile number and a one-time code.
+ * With the backend the code comes by SMS; in the browser demo it is shown on screen.
  */
-export function PhoneSignIn({ onSignedIn }: { onSignedIn: () => void }) {
+export function PhoneSignIn({ onSignedIn, headingLevel = 2 }: { onSignedIn?: () => void; headingLevel?: 1 | 2 }) {
   const { t } = useLocale();
+  const { refresh } = useCustomerSession();
+  const Heading = headingLevel === 1 ? 'h1' : 'h2';
   const [phone, setPhone] = useState('');
   const [code, setCode] = useState('');
   const [step, setStep] = useState<'phone' | 'code'>('phone');
@@ -47,7 +49,8 @@ export function PhoneSignIn({ onSignedIn }: { onSignedIn: () => void }) {
     setError(undefined);
     try {
       await api.verifySignInCode(normalizeSaudiMobile(phone)!, code);
-      onSignedIn();
+      await refresh();
+      onSignedIn?.();
     } catch (err) {
       setError(err instanceof ApiError && err.code === 'VALIDATION_ERROR' ? t('auth.codeInvalid') : failMessage(err));
     } finally {
@@ -57,11 +60,11 @@ export function PhoneSignIn({ onSignedIn }: { onSignedIn: () => void }) {
 
   return (
     <section className="rounded-3xl border border-ink-100 bg-white p-5 sm:p-6" aria-labelledby="signin-title">
-      <h2 id="signin-title" className="flex items-center gap-2 text-lg font-bold">
+      <Heading id="signin-title" className={headingLevel === 1 ? 'flex items-center gap-2 text-2xl font-extrabold' : 'flex items-center gap-2 text-lg font-bold'}>
         <Smartphone className="size-5 text-plum-600" aria-hidden="true" />
-        {t('auth.title')}
-      </h2>
-      <p className="mt-1 text-sm text-ink-500">{t('auth.text')}</p>
+        {t(api.isDemo ? 'auth.titleDemo' : 'auth.title')}
+      </Heading>
+      <p className="mt-1 text-sm text-ink-500">{t(api.isDemo ? 'auth.textDemo' : 'auth.text')}</p>
       {step === 'phone' ? (
         <form onSubmit={sendCode} className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-end" noValidate>
           <Field label={t('booking.phone')} error={error} className="flex-1">

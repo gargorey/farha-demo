@@ -57,6 +57,7 @@ Business rules (VAT, lead time, cancellation/change windows, contact details, br
 Demo helpers:
 - `?lang=en` or `?lang=ar` on any URL sets the language.
 - `?simulate=booking-error` makes booking submissions fail (to show the error state); `?simulate=off` resets.
+- Demo sign-in ("Sign in" in the header, or `/signin`): enter any Saudi mobile number and the 6-digit code is shown on screen (no SMS). Signed in, My bookings shows only that number's bookings; sample bookings are created for the signed-in number. Same steps as the real backend sign-in.
 - "Load sample bookings" on the empty My bookings page; "Demo controls" on a booking simulate provider actions.
 
 ## Stack
@@ -107,7 +108,7 @@ Home (search, categories, popular, recommended, how it works, by occasion, benef
 
 ## Known demo limitations
 
-- No backend: data comes from `src/services/mock`; bookings are stored in this browser's `localStorage` (not secure, not shared across devices). Booking form drafts live in `sessionStorage` until submitted.
+- No backend: data comes from `src/services/mock`; bookings are stored in this browser's `localStorage` (not secure, not shared across devices). Booking form drafts live in `sessionStorage` until submitted. The demo sign-in is fake: the "session" is a phone number in `localStorage`.
 - Availability is generated, not real. Provider confirmation is simulated via Demo controls.
 - No authentication, payments or notifications.
 - Imagery is bundled vector artwork per category (no broken images, works offline). Real photos can be added via `media[].url` on each service.

@@ -12,6 +12,7 @@ const BookingPage = lazy(() => import('@/pages/BookingPage'));
 const BookingConfirmationPage = lazy(() => import('@/pages/BookingConfirmationPage'));
 const MyBookingsPage = lazy(() => import('@/pages/MyBookingsPage'));
 const BookingDetailsPage = lazy(() => import('@/pages/BookingDetailsPage'));
+const SignInPage = lazy(() => import('@/pages/SignInPage'));
 const AboutPage = lazy(() => import('@/pages/AboutPage'));
 const ContactPage = lazy(() => import('@/pages/ContactPage'));
 const FaqPage = lazy(() => import('@/pages/FaqPage'));
@@ -31,6 +32,7 @@ export const routes: RouteObject[] = [
       { path: 'booking/confirmation/:id', element: s(<BookingConfirmationPage />) },
       { path: 'bookings', element: s(<MyBookingsPage />) },
       { path: 'bookings/:id', element: s(<BookingDetailsPage />) },
+      { path: 'signin', element: s(<SignInPage />) },
       { path: 'about', element: s(<AboutPage />) },
       { path: 'contact', element: s(<ContactPage />) },
       { path: 'faq', element: s(<FaqPage />) },
