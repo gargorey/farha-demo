@@ -1,6 +1,8 @@
-import { lazy, Suspense, useMemo, type ReactNode } from 'react';
+import { Suspense, useMemo, type ReactNode } from 'react';
 import { createHashRouter, Link, RouterProvider, type RouteObject } from 'react-router-dom';
 import { ErrorBoundary } from '@/app/ErrorBoundary';
+import { RouteError } from '@/app/RouteError';
+import { lazyWithReload } from '@/utils/lazy-with-reload';
 import { ReferenceDataProvider } from '@/app/ReferenceDataProvider';
 import { EmptyState, LoadingBlock } from '@/components/common/StateViews';
 import { SessionProvider, useSession } from './auth/session';
@@ -12,19 +14,19 @@ import LoginPage, { AuthShell } from './pages/LoginPage';
 import { ChangePasswordForm } from './components/ChangePassword';
 import OverviewPage from './pages/OverviewPage';
 
-const BookingsPage = lazy(() => import('./pages/BookingsPage'));
-const BookingDetailPage = lazy(() => import('./pages/BookingDetailPage'));
-const CalendarPage = lazy(() => import('./pages/CalendarPage'));
-const ServicesPage = lazy(() => import('./pages/ServicesPage'));
-const ServiceEditPage = lazy(() => import('./pages/ServiceEditPage'));
-const CategoriesPage = lazy(() => import('./pages/CategoriesPage'));
-const ProvidersPage = lazy(() => import('./pages/ProvidersPage'));
-const CustomersPage = lazy(() => import('./pages/CustomersPage'));
-const CustomerDetailPage = lazy(() => import('./pages/CustomerDetailPage'));
-const PricingPage = lazy(() => import('./pages/PricingPage'));
-const PromotionsPage = lazy(() => import('./pages/PromotionsPage'));
-const ReportsPage = lazy(() => import('./pages/ReportsPage'));
-const StaffPage = lazy(() => import('./pages/StaffPage'));
+const BookingsPage = lazyWithReload(() => import('./pages/BookingsPage'));
+const BookingDetailPage = lazyWithReload(() => import('./pages/BookingDetailPage'));
+const CalendarPage = lazyWithReload(() => import('./pages/CalendarPage'));
+const ServicesPage = lazyWithReload(() => import('./pages/ServicesPage'));
+const ServiceEditPage = lazyWithReload(() => import('./pages/ServiceEditPage'));
+const CategoriesPage = lazyWithReload(() => import('./pages/CategoriesPage'));
+const ProvidersPage = lazyWithReload(() => import('./pages/ProvidersPage'));
+const CustomersPage = lazyWithReload(() => import('./pages/CustomersPage'));
+const CustomerDetailPage = lazyWithReload(() => import('./pages/CustomerDetailPage'));
+const PricingPage = lazyWithReload(() => import('./pages/PricingPage'));
+const PromotionsPage = lazyWithReload(() => import('./pages/PromotionsPage'));
+const ReportsPage = lazyWithReload(() => import('./pages/ReportsPage'));
+const StaffPage = lazyWithReload(() => import('./pages/StaffPage'));
 
 const s = (el: ReactNode) => <Suspense fallback={<LoadingBlock />}>{el}</Suspense>;
 
@@ -46,6 +48,7 @@ function NotFound() {
 const routes: RouteObject[] = [
   {
     element: <AdminLayout />,
+    errorElement: <RouteError />,
     children: [
       { index: true, element: <OverviewPage /> },
       { path: 'bookings', element: s(<BookingsPage />) },

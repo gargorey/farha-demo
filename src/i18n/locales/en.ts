@@ -522,6 +522,9 @@ const en = {
     title: 'Something went wrong',
     text: 'An unexpected error occurred. Please try again.',
     network: 'Connection problem. Please check your connection and try again.',
+    updateTitle: 'A new version is available',
+    updateText: 'The site was just updated. Reload the page to continue.',
+    reload: 'Reload page',
   },
   footer: {
     about: 'Bilingual entertainment booking for celebrations across Saudi Arabia.',
