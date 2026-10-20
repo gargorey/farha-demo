@@ -1,5 +1,5 @@
 import { CalendarHeart, LogOut, Sparkles } from 'lucide-react';
-import { api, type CustomerSessionInfo } from '@/services/api';
+import { api } from '@/services/api';
 import { demoControls } from '@/services/mock/mock-client';
 import { useAsync } from '@/hooks/useAsync';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
@@ -7,7 +7,8 @@ import { useLocale } from '@/hooks/useLocale';
 import { isActiveStatus } from '@/utils/booking-lifecycle';
 import { useServicesIndex } from '@/features/customer-bookings/useServicesIndex';
 import { BookingSummaryCard } from '@/features/customer-bookings/BookingSummaryCard';
-import { PhoneSignIn } from '@/features/customer-bookings/PhoneSignIn';
+import { PhoneSignIn } from '@/features/customer-auth/PhoneSignIn';
+import { useCustomerSession } from '@/features/customer-auth/session-context';
 import { formatSaudiMobile } from '@/utils/phone';
 import { Breadcrumbs } from '@/components/common/Breadcrumbs';
 import { Button, ButtonLink } from '@/components/common/Button';
@@ -18,13 +19,9 @@ import { EmptyState, ErrorState, LoadingBlock } from '@/components/common/StateV
 export default function MyBookingsPage() {
   const { t } = useLocale();
   useDocumentTitle(t('bookings.title'));
-  const { data, error, loading, reload } = useAsync(() => api.listBookings(), []);
-  // With the backend, customers can sign in by phone to see bookings from any device.
-  const session = useAsync(() => (api.isDemo ? Promise.resolve<CustomerSessionInfo>({ verified: false }) : api.getCustomerSession()), []);
-  const refresh = () => {
-    session.reload();
-    reload();
-  };
+  const { session, signOut } = useCustomerSession();
+  // Reloads when the customer signs in or out, so the list follows the signed-in number.
+  const { data, error, loading, reload } = useAsync(() => api.listBookings(), [session.phone]);
   const services = useServicesIndex();
 
   const sorted = [...(data ?? [])].sort((a, b) => a.event.date.localeCompare(b.event.date));
@@ -36,20 +33,18 @@ export default function MyBookingsPage() {
       <Breadcrumbs items={[{ label: t('nav.home'), to: '/' }, { label: t('bookings.title') }]} />
       <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl">{t('bookings.title')}</h1>
       {api.isDemo && <DemoNote className="mt-4">{t('bookings.demoSession')}</DemoNote>}
-      {!api.isDemo && session.data && (
-        <div className="mt-6">
-          {session.data.verified ? (
-            <p className="flex flex-wrap items-center gap-3 text-sm text-ink-500">
-              <span>{t('bookings.signedInAs', { phone: formatSaudiMobile(session.data.phone ?? '') })}</span>
-              <Button size="sm" variant="ghost" icon={<LogOut className="flip-rtl size-4" aria-hidden="true" />} onClick={() => api.signOut().then(refresh)}>
-                {t('bookings.signOut')}
-              </Button>
-            </p>
-          ) : (
-            <PhoneSignIn onSignedIn={refresh} />
-          )}
-        </div>
-      )}
+      <div className="mt-6">
+        {session.verified ? (
+          <p className="flex flex-wrap items-center gap-3 text-sm text-ink-500">
+            <span>{t(api.isDemo ? 'bookings.signedInAsDemo' : 'bookings.signedInAs', { phone: `\u2066${formatSaudiMobile(session.phone ?? '')}\u2069` })}</span>
+            <Button size="sm" variant="ghost" icon={<LogOut className="flip-rtl size-4" aria-hidden="true" />} onClick={() => void signOut()}>
+              {t('bookings.signOut')}
+            </Button>
+          </p>
+        ) : (
+          <PhoneSignIn />
+        )}
+      </div>
 
       <div className="mt-8">
         {error ? (
